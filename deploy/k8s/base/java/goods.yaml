@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods
+  namespace: marketplace
+  labels:
+    app: goods
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: goods
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods
+  namespace: marketplace
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: goods
+  template:
+    metadata:
+      labels:
+        app: goods
+    spec:
+      containers:
+        - name: goods
+          image: localhost:5000/goods:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: marketplace-secrets
