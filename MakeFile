@@ -1,0 +1,24 @@
+SHELL := /bin/bash
+
+IMAGE_NAME ?= marketplace-web:local
+CONTAINER_NAME ?= marketplace-web
+WEB_PORT ?= 3000
+VITE_API_BASE_URL ?= http://localhost:8080
+VITE_DEBUG_FALLBACK ?= true
+
+.PHONY: web-up web-down
+
+web-up:
+	@IMAGE_NAME="$(IMAGE_NAME)" \
+	CONTAINER_NAME="$(CONTAINER_NAME)" \
+	WEB_PORT="$(WEB_PORT)" \
+	VITE_API_BASE_URL="$(VITE_API_BASE_URL)" \
+	VITE_DEBUG_FALLBACK="$(VITE_DEBUG_FALLBACK)" \
+	./scripts/run-web.sh
+
+web-down:
+	@if docker ps -a --format '{{.Names}}' | grep -Eq '^$(CONTAINER_NAME)$$'; then \
+		docker rm -f "$(CONTAINER_NAME)"; \
+	else \
+		echo "Container $(CONTAINER_NAME) does not exist"; \
+	fi
