@@ -1,0 +1,9 @@
+resources:
+  - users-api.yaml
+  - goods-api.yaml
+  - catalog-api.yaml
+  - search-api.yaml
+  - order-api.yaml
+  - favorite-api.yaml
+  - cart-api.yaml
+  - web.yaml
