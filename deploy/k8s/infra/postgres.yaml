@@ -50,7 +50,7 @@ spec:
       volumes:
         - name: init-script
           configMap:
-            name: postgres-init-script
+            name: postgres-init
 
   volumeClaimTemplates:
     - metadata:
