@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "search-service"
+version = "0.1.0"
+description = "Marketplace search-api with OpenSearch sync"
+authors = ["OpenAI <support@openai.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "0.115.12"
+uvicorn = {version = "0.34.0", extras = ["standard"]}
+requests = "2.32.3"
+opensearch-py = "2.8.0"
+pydantic-settings = "2.8.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
