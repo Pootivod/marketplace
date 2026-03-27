@@ -1,12 +1,14 @@
 services:
   jenkins:
     build: .
+    ports:
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../:/usr/share/jenkins/ref/workspace/Build:ro
+      - ../:/usr/share/jenkins/ref/workspace/buildPipeline:ro
       - m2-cache:/root/.m2
     environment:
-      CASC_JENKINS_CONFIG: /var/jenkins_home/workspace/Build/local-build/jenkins-casc.yaml
+      CASC_JENKINS_CONFIG: /var/jenkins_home/workspace/buildPipeline/local-build/jenkins-casc.yaml
       JAVA_OPTS: -Djenkins.install.runSetupWizard=false
     extra_hosts: [ "host.docker.internal:host-gateway" ]
 volumes:
