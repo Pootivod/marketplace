@@ -1,5 +1,6 @@
 // Used in cloud and locally (local-build/). TODO: env build params, parallel build - java python web
 pipeline {
+agent none
     stages {
         // Ref to name in local-build/ (workspace path)
         stage('Build') {
@@ -25,12 +26,12 @@ pipeline {
 
                         files.each { file ->
                             def imageName = file.name.take(file.name.lastIndexOf("."))
-                            def manifest = readJSON(text: sh("tar -xOf ${file.path} manifest.json"))
+                            def manifest = readJSON(text: sh(script: "tar -xOf ${file.path} manifest.json", returnStdout: true).trim())
                             def tags = manifest[0].RepoTags
                             // tag - name:version
                             tags.each { tag ->
                             def target = "docker://${registry}/${tag}"
-                            sh "scopeo copy --dest-tls-verify=false docker-archive:${file.path} ${target}"
+                            sh "skopeo copy --dest-tls-verify=false docker-archive:${file.path} ${target}"
                             }
 
                         }

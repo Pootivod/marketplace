@@ -1,22 +1,20 @@
 import jenkins.model.Jenkins
-import hudson.init.InitMilestone
-import hudson.init.Initializer
-import javaposse.jobdsl.plugin.ExecuteDslScripts
+import javaposse.jobdsl.dsl.DslScriptLoader
+import javaposse.jobdsl.plugin.JenkinsJobManagement
 
-@Initializer(after = InitMilestone.COMPLETED)
-def setupAndRun() {
-    def generated = new ExecuteDslScripts().runScript("""
-        pipelineJob('MyImmediateJob') {
-            definition {
-                cps {
-                    script(new File('/var/jenkins_home/workspace/buildPipeline/Jenkinsfile').text)
-                    sandbox()
-                }
+def jm = new JenkinsJobManagement(System.out, System.getenv(), new File('.'))
+
+def dsl = """
+    pipelineJob('buildPipeline') {
+        configure { it / 'customWorkspace' << '/var/jenkins_home/workspace/buildPipeline' }
+        definition {
+            cps {
+                script(new File('/var/jenkins_home/workspace/buildPipeline/Jenkinsfile').text)
+                sandbox()
             }
         }
-    """)
-
-    generated.jobs.each {
-        Jenkins.get().getItemByFullName(it.jobName).scheduleBuild2(0)
     }
-}
+"""
+
+new DslScriptLoader(jm).runScript(dsl)
+Jenkins.instance.getItem('buildPipeline').scheduleBuild2(0)
