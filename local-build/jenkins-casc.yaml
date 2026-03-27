@@ -1,0 +1,12 @@
+jenkins:
+  numExecutors: "1" # Maybe change
+jobs:
+  - script: >
+      pipelineJob('build') {
+        definition { cps { script(readFileFromWorkspace('local-build/Jenkinsfile')) } }
+      }
+unclassified:
+  shell:
+    shell: |
+      import jenkins.model.Jenkins
+      Jenkins.instance.getItem('Build').scheduleBuild()

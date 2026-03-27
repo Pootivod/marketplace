@@ -1,0 +1,14 @@
+services:
+  builder:
+    image: maven:3.9.6-eclipse-temurin-21
+    volumes:
+      - .:/usr/src/app
+      - maven-cache:/root/.m2
+    working_dir: /usr/src/app
+#    TODO: Control jib:build/jib:dockerBuild and -DskipTests
+    command: mvn clean package jib:build -DskipTests
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  maven-cache:

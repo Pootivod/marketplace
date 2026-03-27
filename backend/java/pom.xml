@@ -61,12 +61,15 @@
 							<image>eclipse-temurin:21-jre-alpine</image>
 						</from>
 						<to>
-							<image>localhost:5000/${project.artifactId}:latest</image>
+							<image>${project.artifactId}</image>
 							<tags>
+								<tag>${project.version}</tag>
 								<tag>latest</tag>
 							</tags>
 						</to>
-						<allowInsecureRegistries>true</allowInsecureRegistries>
+						<outputPaths>
+							<tar>${maven.multiModuleProjectDirectory}/target/images/${project.artifactId}.tar</tar>
+						</outputPaths>
 					</configuration>
 				</plugin>
 			</plugins>
