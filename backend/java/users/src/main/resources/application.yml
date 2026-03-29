@@ -7,3 +7,14 @@ app:
     username: ${KEYCLOAK_ADMIN}
     password: ${KEYCLOAK_ADMIN_PASSWORD}
     app-realm: ${KEYCLOAK_REALM:marketplace}
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://${POSTGRES_ADDR}/goods
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
