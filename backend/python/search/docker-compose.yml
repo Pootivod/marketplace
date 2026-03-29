@@ -1,0 +1,26 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+
+  search-api:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - opensearch
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  opensearch-data:

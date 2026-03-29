@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-import
+  namespace: marketplace
+data:
+  marketplace-realm.json: |
+    {
+      "realm": "marketplace",
+      "enabled": true,
+      "registrationAllowed": true,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "resetPasswordAllowed": true,
+      "clients": [
+        {
+          "clientId": "marketplace-web",
+          "name": "Marketplace Web",
+          "enabled": true,
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "standardFlowEnabled": true,
+          "redirectUris": [
+            "http://localhost:3000/*",
+            "http://localhost:8080/*",
+            "http://localhost:8081/*"
+          ],
+          "webOrigins": [
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "http://localhost:8081"
+          ],
+          "protocol": "openid-connect"
+        }
+      ],
+      "roles": {
+        "realm": [
+          {"name": "USER"},
+          {"name": "ADMIN"}
+        ]
+      }
+    }
