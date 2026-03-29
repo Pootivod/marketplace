@@ -1,0 +1,18 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          authorities-claim-name: realm_access.roles
+          authority-prefix: ROLE_
+management:
+  server:
+    port: 9000
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      probes:
+        enabled: true

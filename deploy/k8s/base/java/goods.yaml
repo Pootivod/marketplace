@@ -5,6 +5,7 @@ metadata:
   namespace: marketplace
   labels:
     app: goods
+    exposed: "true"
 spec:
   type: ClusterIP
   ports:
@@ -38,3 +39,5 @@ spec:
           envFrom:
             - secretRef:
                 name: marketplace-secrets
+            - configMapRef:
+                name: global-config

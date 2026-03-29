@@ -1,11 +1,11 @@
-package com.marketplace.usersapi;
+package com.marketplace.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UsersApiApplication {
+public class GatewayApplication {
     public static void main(String[] args) {
-        SpringApplication.run(UsersApiApplication.class, args);
+        SpringApplication.run(GatewayApplication.class, args);
     }
 }

@@ -1,0 +1,96 @@
+package com.marketplace.users.service;
+
+import jakarta.ws.rs.core.Response;
+import org.keycloak.admin.client.CreatedResponseUtil;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class KeycloakService {
+    private final String serverUrl;
+    private final String adminRealm;
+    private final String appRealm;
+    private final String clientId;
+    private final String adminUsername;
+    private final String adminPassword;
+
+    public KeycloakService(
+        @Value("${app.keycloak.server-url}") String serverUrl,
+        @Value("${app.keycloak.admin-realm}") String adminRealm,
+        @Value("${app.keycloak.app-realm}") String appRealm,
+        @Value("${app.keycloak.client-id}") String clientId,
+        @Value("${app.keycloak.username}") String adminUsername,
+        @Value("${app.keycloak.password}") String adminPassword) {
+        this.serverUrl = serverUrl;
+        this.adminRealm = adminRealm;
+        this.appRealm = appRealm;
+        this.clientId = clientId;
+        this.adminUsername = adminUsername;
+        this.adminPassword = adminPassword;
+    }
+
+    public String createUser(String encryptedPassword) {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        // TODO: Пароль нельзя отправлять с клиента в открытом виде.
+        //  Нужно на стороне клиента шифровать открытым ключом а тут расшифровывать
+        final String password = encryptedPassword;
+
+        credential.setValue(password);
+        credential.setTemporary(false);
+
+        final String generatedUsername = UUID.randomUUID().toString();
+
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername(generatedUsername);
+        user.setCredentials(List.of(credential));
+        user.setEnabled(true);
+
+        try (Response response = getAdminKeycloak().realm(appRealm).users().create(user)) {
+            if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+                throw new RuntimeException(
+                    String.format("Keycloak error %d %s", response.getStatus(), response.readEntity(String.class))
+                );
+            }
+        }
+
+        return generatedUsername;
+
+    }
+
+    public String login(String keycloakUsername, String encryptedPassword) {
+        return getUserKeycloak(keycloakUsername, encryptedPassword).tokenManager().getAccessTokenString();
+    }
+
+    private Keycloak getAdminKeycloak() {
+        return KeycloakBuilder.builder()
+            .serverUrl(serverUrl)
+            .realm(adminRealm)
+            .clientId(clientId)
+            .username(adminUsername)
+            .password(adminPassword)
+            .build();
+    }
+
+    private Keycloak getUserKeycloak(String username, String encryptedPassword) {
+        // TODO: decrypt
+        String password = encryptedPassword;
+
+        return KeycloakBuilder.builder()
+            .serverUrl(serverUrl)
+            .realm(appRealm)
+            .clientId(clientId)
+            .username(username)
+            .password(password)
+            .build();
+    }
+}

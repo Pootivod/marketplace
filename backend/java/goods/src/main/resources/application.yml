@@ -1,6 +1,6 @@
 spring:
   r2dbc:
-    url: r2dbc:postgresql://postgres:5432/goods
+    url: r2dbc:postgresql://${POSTGRES_ADDR}/goods
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 

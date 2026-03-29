@@ -13,6 +13,9 @@
 	<version>${revision}</version>
 	<packaging>pom</packaging>
 	<modules>
+		<module>common-starter</module>
+		<module>gateway</module>
+		<module>users</module>
 		<module>goods</module>
 	</modules>
 	<properties>
@@ -53,10 +56,41 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+							</path>
+						</annotationProcessorPaths>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<configuration>
+						<excludes>
+							<exclude>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+							</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>com.google.cloud.tools</groupId>
 					<artifactId>jib-maven-plugin</artifactId>
 					<version>3.4.1</version>
 					<configuration>
+						<container>
+							<ports>
+								<port>8080</port>
+								<port>9000</port>
+							</ports>
+							<user>nobody</user>
+						</container>
 						<from>
 							<image>eclipse-temurin:21-jre-alpine</image>
 						</from>
