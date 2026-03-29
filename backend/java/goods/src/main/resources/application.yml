@@ -1,16 +1,10 @@
 spring:
-  application:
-    name: goods-api
+  r2dbc:
+    url: r2dbc:postgresql://${POSTGRES_ADDR}/goods
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
 
-server:
-  port: 8080
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      probes:
-        enabled: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
