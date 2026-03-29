@@ -6,12 +6,29 @@ import SectionTitle from '../components/SectionTitle'
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([])
   const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    Promise.all([getCartItems(), getProducts()]).then(([cart, goods]) => {
-      setCartItems(cart)
-      setProducts(goods)
-    })
+    let active = true
+
+    Promise.all([getCartItems(), getProducts()])
+      .then(([cart, goods]) => {
+        if (!active) return
+        setCartItems(Array.isArray(cart) ? cart : [])
+        setProducts(Array.isArray(goods) ? goods : [])
+      })
+      .catch((err) => {
+        if (!active) return
+        setError(err.message || 'Failed to load cart.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const items = useMemo(() => {
@@ -26,6 +43,9 @@ export default function CartPage() {
   return (
     <section>
       <SectionTitle title="Cart" subtitle="List of products, quantities and order action." />
+
+      {error ? <div className="info-card"><p className="form-error">{error}</p></div> : null}
+      {loading ? <div className="info-card"><p>Loading cart...</p></div> : null}
 
       <div className="stack">
         {items.map((item) => (
@@ -42,6 +62,8 @@ export default function CartPage() {
           </div>
         ))}
       </div>
+
+      {!loading && items.length === 0 ? <div className="info-card"><p>Cart is empty.</p></div> : null}
 
       <div className="actions-row">
         <Link className="button button--primary" to="/checkout">Proceed to checkout</Link>

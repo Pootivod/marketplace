@@ -1,55 +1,58 @@
 SHELL := /bin/bash
 
-WEB_IMAGE_NAME ?= marketplace-web:local
-WEB_CONTAINER_NAME ?= marketplace-web
-WEB_PORT ?= 3000
-VITE_API_BASE_URL ?= http://localhost:8080
-VITE_DEBUG_FALLBACK ?= true
+.PHONY: start stop \
+        up-web down-web \
+        up-gateway-api down-gateway-api \
+        up-users-api down-users-api \
+        up-keycloak down-keycloak \
+        up-postgres-users down-postgres-users \
+        up-postgres-keycloak down-postgres-keycloak \
+        up-pgadmin down-pgadmin
 
-SEARCH_IMAGE_NAME ?= marketplace-search-api:local
-SEARCH_CONTAINER_NAME ?= marketplace-search-api
-SEARCH_PORT ?= 8082
-GOODS_API_BASE_URL ?= http://host.docker.internal:8080
-OPENSEARCH_URL ?= http://host.docker.internal:9200
-SYNC_INTERVAL_SECONDS ?= 600
-INDEX_NAME ?= goods_search_v1
-LOG_LEVEL ?= INFO
+start:
+	@./scripts/start.sh
 
-.PHONY: up-web down-web up-search down-search up-all down-all
+stop:
+	@./scripts/stop.sh
 
 up-web:
-	@IMAGE_NAME="$(WEB_IMAGE_NAME)" \
-	CONTAINER_NAME="$(WEB_CONTAINER_NAME)" \
-	WEB_PORT="$(WEB_PORT)" \
-	VITE_API_BASE_URL="$(VITE_API_BASE_URL)" \
-	VITE_DEBUG_FALLBACK="$(VITE_DEBUG_FALLBACK)" \
-	./scripts/run-web.sh
+	@./scripts/up-service.sh web
 
 down-web:
-	@if docker ps -a --format '{{.Names}}' | grep -Eq '^$(WEB_CONTAINER_NAME)$$'; then \
-		docker rm -f "$(WEB_CONTAINER_NAME)"; \
-	else \
-		echo "Container $(WEB_CONTAINER_NAME) does not exist"; \
-	fi
+	@./scripts/down-service.sh web
 
-up-search:
-	@IMAGE_NAME="$(SEARCH_IMAGE_NAME)" \
-	CONTAINER_NAME="$(SEARCH_CONTAINER_NAME)" \
-	SEARCH_PORT="$(SEARCH_PORT)" \
-	GOODS_API_BASE_URL="$(GOODS_API_BASE_URL)" \
-	OPENSEARCH_URL="$(OPENSEARCH_URL)" \
-	SYNC_INTERVAL_SECONDS="$(SYNC_INTERVAL_SECONDS)" \
-	INDEX_NAME="$(INDEX_NAME)" \
-	LOG_LEVEL="$(LOG_LEVEL)" \
-	./scripts/run-search.sh
+up-gateway-api:
+	@./scripts/up-service.sh gateway-api
 
-down-search:
-	@if docker ps -a --format '{{.Names}}' | grep -Eq '^$(SEARCH_CONTAINER_NAME)$$'; then \
-		docker rm -f "$(SEARCH_CONTAINER_NAME)"; \
-	else \
-		echo "Container $(SEARCH_CONTAINER_NAME) does not exist"; \
-	fi
+down-gateway-api:
+	@./scripts/down-service.sh gateway-api
 
-up-all: up-search up-web
+up-users-api:
+	@./scripts/up-service.sh users-api
 
-down-all: down-web down-search
+down-users-api:
+	@./scripts/down-service.sh users-api
+
+up-keycloak:
+	@./scripts/up-service.sh keycloak
+
+down-keycloak:
+	@./scripts/down-service.sh keycloak
+
+up-postgres-users:
+	@./scripts/up-service.sh postgres-users
+
+down-postgres-users:
+	@./scripts/down-service.sh postgres-users
+
+up-postgres-keycloak:
+	@./scripts/up-service.sh postgres-keycloak
+
+down-postgres-keycloak:
+	@./scripts/down-service.sh postgres-keycloak
+
+up-pgadmin:
+	@./scripts/up-service.sh pgadmin
+
+down-pgadmin:
+	@./scripts/down-service.sh pgadmin

@@ -8,13 +8,30 @@ export default function CatalogPage() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
-    Promise.all([getCategories(), getProducts()]).then(([categoryList, productList]) => {
-      setCategories(categoryList)
-      setProducts(productList)
-    })
+    let active = true
+
+    Promise.all([getCategories(), getProducts()])
+      .then(([categoryList, productList]) => {
+        if (!active) return
+        setCategories(Array.isArray(categoryList) ? categoryList : [])
+        setProducts(Array.isArray(productList) ? productList : [])
+      })
+      .catch((err) => {
+        if (!active) return
+        setError(err.message || 'Failed to load catalog.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const query = (searchParams.get('q') || '').trim().toLowerCase()
@@ -22,7 +39,7 @@ export default function CatalogPage() {
   const filteredProducts = useMemo(() => {
     return products.filter((item) => {
       const matchesCategory = activeCategory === 'all' || item.category === activeCategory
-      const matchesQuery = !query || item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)
+      const matchesQuery = !query || item.title?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query)
       return matchesCategory && matchesQuery
     })
   }, [activeCategory, products, query])
@@ -30,6 +47,8 @@ export default function CatalogPage() {
   return (
     <section>
       <SectionTitle title="Catalog" subtitle="Categories on the left and product cards in the center." />
+
+      {error ? <div className="info-card"><p className="form-error">{error}</p></div> : null}
 
       <div className="catalog-layout">
         <aside className="sidebar">
@@ -55,6 +74,8 @@ export default function CatalogPage() {
 
         <div className="catalog-content">
           {query ? <p className="catalog-query">Search result for: <strong>{query}</strong></p> : null}
+          {loading ? <div className="info-card"><p>Loading catalog...</p></div> : null}
+          {!loading && filteredProducts.length === 0 ? <div className="info-card"><p>No products found.</p></div> : null}
           <div className="grid grid--products">
             {filteredProducts.map((item) => (
               <ProductCard key={item.id} product={item} />

@@ -1,44 +1,37 @@
-import { fetchWithFallback } from './client'
-import { mockUser, mockProducts, mockCartItems, mockFavoriteIds, mockCategories } from '../data/mockData'
+import { getJson, postJson, putJson } from './client'
 
 export function getUser() {
-  return fetchWithFallback({
-    path: '/api/users/me',
-    fallbackData: mockUser,
-  })
+  return getJson('/api/v1/users/me')
+}
+
+export function updateUser(payload) {
+  return putJson('/api/v1/users/me', payload)
+}
+
+export function getUsers() {
+  return getJson('/api/v1/users')
+}
+
+export function createUser(payload) {
+  return postJson('/api/v1/users', payload)
 }
 
 export function getProducts() {
-  return fetchWithFallback({
-    path: '/api/catalog/products',
-    fallbackData: mockProducts,
-  })
+  return getJson('/api/v1/catalog/products')
 }
 
 export function getProductById(id) {
-  return fetchWithFallback({
-    path: `/api/goods/${id}`,
-    fallbackData: () => mockProducts.find((item) => String(item.id) === String(id)) || null,
-  })
+  return getJson(`/api/v1/goods/${id}`)
 }
 
 export function getCategories() {
-  return fetchWithFallback({
-    path: '/api/catalog/categories',
-    fallbackData: mockCategories,
-  })
+  return getJson('/api/v1/catalog/categories')
 }
 
 export function getCartItems() {
-  return fetchWithFallback({
-    path: '/api/cart',
-    fallbackData: mockCartItems,
-  })
+  return getJson('/api/v1/cart')
 }
 
 export function getFavorites() {
-  return fetchWithFallback({
-    path: '/api/favorite',
-    fallbackData: mockFavoriteIds,
-  })
+  return getJson('/api/v1/favorites')
 }

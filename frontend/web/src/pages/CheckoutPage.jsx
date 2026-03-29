@@ -6,12 +6,29 @@ import SectionTitle from '../components/SectionTitle'
 export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState([])
   const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    Promise.all([getCartItems(), getProducts()]).then(([cart, goods]) => {
-      setCartItems(cart)
-      setProducts(goods)
-    })
+    let active = true
+
+    Promise.all([getCartItems(), getProducts()])
+      .then(([cart, goods]) => {
+        if (!active) return
+        setCartItems(Array.isArray(cart) ? cart : [])
+        setProducts(Array.isArray(goods) ? goods : [])
+      })
+      .catch((err) => {
+        if (!active) return
+        setError(err.message || 'Failed to load checkout data.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const items = useMemo(() => {
@@ -26,6 +43,8 @@ export default function CheckoutPage() {
   return (
     <section>
       <SectionTitle title="Checkout" subtitle="Short cart list, card fields and pay button." />
+      {error ? <div className="info-card"><p className="form-error">{error}</p></div> : null}
+      {loading ? <div className="info-card"><p>Loading checkout...</p></div> : null}
 
       <div className="checkout-layout">
         <CartSummary items={items} />

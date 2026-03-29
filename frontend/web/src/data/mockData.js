@@ -5,6 +5,27 @@ export const mockUser = {
   avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
 }
 
+export const mockAdminUsers = [
+  {
+    id: 1,
+    name: 'Adam Klimov',
+    email: 'adam@example.com',
+    role: 'ADMIN',
+  },
+  {
+    id: 2,
+    name: 'Lena Cole',
+    email: 'lena@example.com',
+    role: 'USER',
+  },
+  {
+    id: 3,
+    name: 'Mark Stone',
+    email: 'mark@example.com',
+    role: 'USER',
+  },
+]
+
 export const mockCategories = [
   { id: 'electronics', name: 'Electronics' },
   { id: 'books', name: 'Books' },

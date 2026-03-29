@@ -400,3 +400,164 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__login,
+.header__logout {
+  white-space: nowrap;
+}
+
+.login-page {
+  max-width: 560px;
+}
+
+.login-form {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.login-form label,
+.checkout-form label {
+  display: grid;
+  gap: 8px;
+  color: #374151;
+}
+
+.form-error {
+  margin: 0;
+  color: #dc2626;
+}
+
+@media (max-width: 980px) {
+  .header__inner {
+    flex-wrap: wrap;
+  }
+
+  .search-form {
+    order: 3;
+    margin-left: 0;
+    min-width: 100%;
+  }
+
+  .header__actions {
+    margin-left: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.admin-form,
+.user-row-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.admin-form {
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.admin-form h2 {
+  margin: 0;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 8px;
+  color: #374151;
+}
+
+.admin-form input,
+.admin-form select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.user-row-card {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.user-row-card h3 {
+  margin: 0 0 6px;
+}
+
+.user-row-card p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.role-badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.header__status {
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.text-muted {
+  margin: 0;
+  color: #6b7280;
+}
+
+.profile-card--column {
+  display: grid;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.profile-form {
+  width: 100%;
+}
+
+.profile-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-success {
+  margin: 0;
+  color: #15803d;
+}
