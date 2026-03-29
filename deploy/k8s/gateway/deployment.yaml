@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway-api
+  name: gateway
   namespace: marketplace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gateway-api
+      app: gateway
   template:
     metadata:
       labels:
-        app: gateway-api
+        app: gateway
     spec:
       containers:
-        - name: gateway-api
-          image: marketplace/gateway-api:local
+        - name: gateway
+          image: marketplace/gateway:local
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
               name: http
           env:
             - name: USERS_API_URL
-              value: http://users-api:8082
+              value: http://users:8082
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
               value: http://keycloak:8080/realms/marketplace
           readinessProbe:

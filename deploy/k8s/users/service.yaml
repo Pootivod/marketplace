@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: users-api
+  name: users
   namespace: marketplace
 spec:
   selector:
-    app: users-api
+    app: users
   ports:
     - name: http
       port: 8082

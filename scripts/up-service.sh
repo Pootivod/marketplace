@@ -117,7 +117,7 @@ wait_rollout() {
     postgres-users|postgres-keycloak)
       kubectl rollout status statefulset/"${service}" -n "${NAMESPACE}" --timeout=180s
       ;;
-    keycloak|users-api|gateway-api|web|pgadmin)
+    keycloak|users|gateway|web|pgadmin)
       kubectl rollout status deployment/"${service}" -n "${NAMESPACE}" --timeout=180s
       ;;
     *)
@@ -148,17 +148,17 @@ up_users_api() {
   up_postgres_users
   up_keycloak
   up_pgadmin
-  build_java_module "users-api"
-  apply_dir "${K8S_DIR}/users-api"
-  wait_rollout "users-api"
+  build_java_module "users"
+  apply_dir "${K8S_DIR}/users"
+  wait_rollout "users"
 }
 
 up_gateway_api() {
   check_java_dependencies
   up_keycloak
-  build_java_module "gateway-api"
-  apply_dir "${K8S_DIR}/gateway-api"
-  wait_rollout "gateway-api"
+  build_java_module "gateway"
+  apply_dir "${K8S_DIR}/gateway"
+  wait_rollout "gateway"
 }
 
 up_web() {
