@@ -16,3 +16,5 @@ management:
     health:
       probes:
         enabled: true
+
+# ${KEYCLOAK_ADDR} ${KEYCLOAK_REALM}

@@ -1,6 +1,6 @@
 package com.marketplace.users;
 
-import com.marketplace.users.dto.CreateUserRequest;
+import com.marketplace.users.dto.RegisterRequest;
 import com.marketplace.users.dto.LoginRequest;
 import com.marketplace.users.entity.User;
 import com.marketplace.users.service.UserService;
@@ -12,20 +12,20 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public Mono<User> createUser(@RequestBody CreateUserRequest request) {
-        return userService.createUser(request);
+    @PostMapping("register")
+    public Mono<User> registers(@RequestBody RegisterRequest request) {
+        return userService.register(request);
     }
 
-    @PostMapping("auth")
-    public Mono<User> auth(LoginRequest request) {
-
+    @PostMapping("login")
+    public Mono<String> login(@RequestBody LoginRequest request) {
+        return userService.login(request);
     }
 
 }

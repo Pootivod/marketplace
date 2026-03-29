@@ -1,6 +1,6 @@
 package com.marketplace.users.service;
 
-import com.marketplace.users.dto.CreateUserRequest;
+import com.marketplace.users.dto.RegisterRequest;
 import com.marketplace.users.dto.LoginRequest;
 import com.marketplace.users.entity.User;
 import com.marketplace.users.repository.UserRepository;
@@ -19,7 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
 
-    public Mono<User> createUser(CreateUserRequest request) {
+    public Mono<User> register(RegisterRequest request) {
         return Mono.fromCallable(() -> keycloakService.createUser(request.getEncryptedPassword()))
             .subscribeOn(Schedulers.boundedElastic())
             .flatMap(keycloakUsername -> saveCreatedUser(keycloakUsername, request));
@@ -38,7 +38,7 @@ public class UserService {
             ));
     }
 
-    private Mono<User> saveCreatedUser(String keycloakUsername, CreateUserRequest request) {
+    private Mono<User> saveCreatedUser(String keycloakUsername, RegisterRequest request) {
         User user = new User();
         user.setId(keycloakUsername);
 

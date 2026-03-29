@@ -4,17 +4,19 @@ server:
 spring:
   cloud:
     gateway:
-      discovery:
-        service-labels:
-          exposed: "true"
-        locator:
-          enabled: true
-          lower-case-service-id: true
-          predicates:
-            - Path='/'+serviceId+'/api/**'
-      default-filters:
-        - TokenRelay=
-        - StripPrefix=1
+      server:
+        webflux:
+          discovery:
+            service-labels:
+              exposed: "true"
+            locator:
+              enabled: true
+              lower-case-service-id: true
+              predicates:
+                - Path='/'+serviceId+'/api/**'
+          default-filters:
+            - TokenRelay=
+            - StripPrefix=1
 
 # Override include. Others on common.starter
 management:

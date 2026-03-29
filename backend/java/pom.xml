@@ -8,20 +8,22 @@
 		<version>4.0.4</version>
 		<relativePath/>
 	</parent>
+
 	<groupId>com.marketplace</groupId>
 	<artifactId>marketplace</artifactId>
 	<version>${revision}</version>
 	<packaging>pom</packaging>
+
 	<modules>
 		<module>common-starter</module>
 		<module>gateway</module>
 		<module>users</module>
 		<module>goods</module>
 	</modules>
+
 	<properties>
 		<revision>1.0.0-SNAPSHOT</revision>
 		<java.version>21</java.version>
-		<spring-cloud.version>2025.1.1</spring-cloud.version>
 	</properties>
 
 	<dependencyManagement>
@@ -29,7 +31,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
+				<version>2025.1.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -48,9 +50,45 @@
 				<artifactId>mapstruct</artifactId>
 				<version>1.6.3</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-starter-webflux-api</artifactId>
+				<version>3.0.2</version>
+			</dependency>
 
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webclient-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webflux-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 	<build>
 		<pluginManagement>
@@ -108,8 +146,31 @@
 
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.4.1</version>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<openapi.outputDir>${maven.multiModuleProjectDirectory}/target/openapi</openapi.outputDir>
+						<openapi.outputFileName>${project.artifactId}-openapi.json</openapi.outputFileName>
+						<KEYCLOAK_ADDR>localhost</KEYCLOAK_ADDR>
+						<KEYCLOAK_REALM>test</KEYCLOAK_REALM>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

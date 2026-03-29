@@ -3,7 +3,7 @@ package com.marketplace.users.dto;
 import lombok.Data;
 
 @Data
-public class CreateUserRequest {
+public class RegisterRequest {
     private String login;
     private String encryptedPassword;
 
