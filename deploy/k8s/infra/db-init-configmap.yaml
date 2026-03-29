@@ -6,4 +6,5 @@ metadata:
 data:
   init.sql: |
     CREATE DATABASE goods;
+    CREATE DATABASE users;
     CREATE DATABASE keycloak;

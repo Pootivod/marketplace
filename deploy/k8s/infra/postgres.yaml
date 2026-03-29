@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-service
+  name: postgres
   namespace: marketplace
 spec:
   ports:
@@ -15,7 +15,7 @@ metadata:
   name: postgres
   namespace: marketplace
 spec:
-  serviceName: "postgres-service"
+  serviceName: "postgres"
   replicas: 1
   selector:
     matchLabels:
