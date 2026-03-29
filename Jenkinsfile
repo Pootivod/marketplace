@@ -37,10 +37,6 @@ agent none
                         }
                     }
                 }
-                sh """
-                docker load -i backend/java/target/jib-image.tar
-                docker push host.docker.internal:5000/backend-app:latest
-                """
             }
         }
     }

@@ -59,7 +59,7 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                - name: global-config
+                name: global-config
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
