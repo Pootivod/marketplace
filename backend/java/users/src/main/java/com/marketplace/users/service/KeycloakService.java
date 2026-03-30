@@ -1,14 +1,12 @@
 package com.marketplace.users.service;
 
 import jakarta.ws.rs.core.Response;
-import org.keycloak.admin.client.CreatedResponseUtil;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +17,9 @@ public class KeycloakService {
     private final String serverUrl;
     private final String adminRealm;
     private final String appRealm;
-    private final String clientId;
+    private final String adminClientId;
+    private final String userClientId;
+    private final String userClientSecret;
     private final String adminUsername;
     private final String adminPassword;
 
@@ -27,13 +27,17 @@ public class KeycloakService {
         @Value("${app.keycloak.server-url}") String serverUrl,
         @Value("${app.keycloak.admin-realm}") String adminRealm,
         @Value("${app.keycloak.app-realm}") String appRealm,
-        @Value("${app.keycloak.client-id}") String clientId,
+        @Value("${app.keycloak.admin-client-id}") String adminClientId,
+        @Value("${app.keycloak.user-client-id}") String userClientId,
+        @Value("${app.keycloak.user-client-secret}") String userClientSecret,
         @Value("${app.keycloak.username}") String adminUsername,
         @Value("${app.keycloak.password}") String adminPassword) {
         this.serverUrl = serverUrl;
         this.adminRealm = adminRealm;
         this.appRealm = appRealm;
-        this.clientId = clientId;
+        this.adminClientId = adminClientId;
+        this.userClientId = userClientId;
+        this.userClientSecret = userClientSecret;
         this.adminUsername = adminUsername;
         this.adminPassword = adminPassword;
     }
@@ -75,20 +79,21 @@ public class KeycloakService {
         return KeycloakBuilder.builder()
             .serverUrl(serverUrl)
             .realm(adminRealm)
-            .clientId(clientId)
+            .clientId(adminClientId)
             .username(adminUsername)
             .password(adminPassword)
             .build();
     }
 
     private Keycloak getUserKeycloak(String username, String encryptedPassword) {
-        // TODO: decrypt
         String password = encryptedPassword;
 
         return KeycloakBuilder.builder()
             .serverUrl(serverUrl)
             .realm(appRealm)
-            .clientId(clientId)
+            .clientId(userClientId)
+            .clientSecret(userClientSecret)
+            .grantType(OAuth2Constants.PASSWORD)
             .username(username)
             .password(password)
             .build();

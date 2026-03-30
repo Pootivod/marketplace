@@ -5,6 +5,7 @@ import com.marketplace.users.dto.LoginRequest;
 import com.marketplace.users.entity.User;
 import com.marketplace.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -15,14 +16,18 @@ import reactor.core.scheduler.Schedulers;
 //  Также сделать create/login напрямую в keycloak с фронта
 public class UserService {
 
-
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
+    private final R2dbcEntityTemplate r2dbcEntityTemplate;
 
     public Mono<User> register(RegisterRequest request) {
-        return Mono.fromCallable(() -> keycloakService.createUser(request.getEncryptedPassword()))
-            .subscribeOn(Schedulers.boundedElastic())
-            .flatMap(keycloakUsername -> saveCreatedUser(keycloakUsername, request));
+        return findKeycloakUsernameByLogin(request.getLogin())
+            .flatMap(existingUser -> Mono.<User>error(new IllegalArgumentException("User already exists")))
+            .switchIfEmpty(
+                Mono.fromCallable(() -> keycloakService.createUser(request.getEncryptedPassword()))
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .flatMap(keycloakUsername -> saveCreatedUser(keycloakUsername, request))
+            );
     }
 
     public Mono<String> login(LoginRequest request) {
@@ -35,7 +40,7 @@ public class UserService {
         return findKeycloakUsernameByLogin(login)
             .flatMap(keycloakUsername -> Mono.fromCallable(
                 () -> keycloakService.login(keycloakUsername, request.getEncryptedPassword())
-            ));
+            ).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private Mono<User> saveCreatedUser(String keycloakUsername, RegisterRequest request) {
@@ -52,7 +57,7 @@ public class UserService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
 
-        return userRepository.save(user);
+        return r2dbcEntityTemplate.insert(User.class).using(user);
     }
 
     private Mono<String> findKeycloakUsernameByLogin(String login) {

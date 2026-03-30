@@ -1,6 +1,9 @@
+app:
+  common-starter:
+    security:
+      enabled: false
 server:
   port: 8080
-
 spring:
   cloud:
     gateway:
@@ -16,7 +19,6 @@ spring:
                 - Path='/'+serviceId+'/api/**'
           default-filters:
             - TokenRelay=
-            - StripPrefix=1
 
 # Override include. Others on common.starter
 management:

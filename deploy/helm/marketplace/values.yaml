@@ -6,8 +6,15 @@ image:
   tag: latest
   pullPolicy: Always
 
+keycloak:
+  realm: marketplace
+  adminRealm: master
+  adminClientId: admin-cli
+  userClientId: marketplace-users
+
 secrets:
   postgresUser: user
   postgresPassword: password
   keycloakAdmin: user
   keycloakAdminPassword: password
+  keycloakUserClientSecret: users-client-secret

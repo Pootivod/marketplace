@@ -1,30 +1,33 @@
 package com.marketplace.gateway;
 
 
+import org.springframework.boot.security.autoconfigure.actuate.web.reactive.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 
-//@Configuration
-public class SecurityConfig {
+/**
+ * Зависимость на либу нужна чтобы переиспользовать некоторые настройки.
+ * При расширении логики - убрать
+ */
+@Configuration
+public class SecurityConfig extends com.marketplace.common.starter.SecurityConfig {
 
-//    @Order(Ordered.HIGHEST_PRECEDENCE)
-//    @Bean
-//    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-//        http
-//            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-//            .authorizeExchange(exchanges -> exchanges
-//                .anyExchange().authenticated()
-//            )
-//
-//            .oauth2ResourceServer(oauth2 -> oauth2
-//                .jwt(Customizer.withDefaults())
-//            );
-//
-//        return http.build();
-//    }
+    @Override
+    @Bean
+    @Order(1)
+    public SecurityWebFilterChain publicChain(ServerHttpSecurity http) {
+        return applyCommon(http)
+            .securityMatcher(new OrServerWebExchangeMatcher(
+                // Отличие в /*/api. Сюда приходит до локатора
+                ServerWebExchangeMatchers.pathMatchers("/*/api/public/**"),
+                EndpointRequest.toAnyEndpoint())
+            )
+            .authorizeExchange(ex -> ex.anyExchange().permitAll())
+            .build();
+    }
 }
