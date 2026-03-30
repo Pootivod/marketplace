@@ -1,0 +1,13 @@
+namespace:
+  name: marketplace
+
+image:
+  registry: localhost:5000
+  tag: latest
+  pullPolicy: Always
+
+secrets:
+  postgresUser: user
+  postgresPassword: password
+  keycloakAdmin: user
+  keycloakAdminPassword: password

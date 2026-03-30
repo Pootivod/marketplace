@@ -1,0 +1,46 @@
+{{ include "marketplace.service" (dict
+  "root" .
+  "name" "keycloak"
+  "type" "ClusterIP"
+  "port" 8080
+  "targetPort" 8080
+) }}
+---
+{{ include "marketplace.deployment" (dict
+  "root" .
+  "name" "keycloak"
+  "replicas" 1
+  "image" "keycloak/keycloak:26.0.5"
+  "args" (list "start-dev" "--import-realm")
+  "ports" (list (dict "containerPort" 8080))
+  "env" (list
+    (dict
+      "name" "POSTGRES_ADDR"
+      "valueFrom" (dict "configMapKeyRef" (dict "name" "global-config" "key" "POSTGRES_ADDR"))
+    )
+    (dict "name" "KC_DB" "value" "postgres")
+    (dict "name" "KC_DB_URL" "value" "jdbc:postgresql://${POSTGRES_ADDR}/keycloak")
+    (dict
+      "name" "KC_DB_USERNAME"
+      "valueFrom" (dict "secretKeyRef" (dict "name" "marketplace-secrets" "key" "POSTGRES_USER"))
+    )
+    (dict
+      "name" "KC_DB_PASSWORD"
+      "valueFrom" (dict "secretKeyRef" (dict "name" "marketplace-secrets" "key" "POSTGRES_PASSWORD"))
+    )
+    (dict
+      "name" "KEYCLOAK_ADMIN"
+      "valueFrom" (dict "secretKeyRef" (dict "name" "marketplace-secrets" "key" "KEYCLOAK_ADMIN"))
+    )
+    (dict
+      "name" "KEYCLOAK_ADMIN_PASSWORD"
+      "valueFrom" (dict "secretKeyRef" (dict "name" "marketplace-secrets" "key" "KEYCLOAK_ADMIN_PASSWORD"))
+    )
+  )
+  "volumeMounts" (list
+    (dict "name" "realm-import" "mountPath" "/opt/keycloak/data/import/")
+  )
+  "volumes" (list
+    (dict "name" "realm-import" "configMap" (dict "name" "keycloak-realm-config"))
+  )
+) }}
