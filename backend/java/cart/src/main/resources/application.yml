@@ -1,16 +1,5 @@
 spring:
-  application:
-    name: cart-api
-
-server:
-  port: 8080
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      probes:
-        enabled: true
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_ADDR}/cart?authSource=admin
+      auto-index-creation: true

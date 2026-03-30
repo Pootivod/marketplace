@@ -2,6 +2,7 @@ package com.marketplace.common.starter;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.security.autoconfigure.actuate.web.reactive.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -25,7 +26,7 @@ public class SecurityConfig {
     @ConditionalOnMissingBean(ReactiveJwtDecoder.class)
     public ReactiveJwtDecoder reactiveJwtDecoder(Environment environment) {
         return NimbusReactiveJwtDecoder.withIssuerLocation(
-            environment.resolvePlaceholders("http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_REALM}")
+            environment.resolvePlaceholders("${KEYCLOAK_ADDR}/realms/${KEYCLOAK_REALM}")
         ).build();
     }
 
@@ -34,6 +35,7 @@ public class SecurityConfig {
         return http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
+                .matchers(EndpointRequest.toAnyEndpoint()).permitAll()
                 .pathMatchers("/api/public/**").permitAll()
                 .anyExchange().authenticated()
             )

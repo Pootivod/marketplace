@@ -69,4 +69,3 @@ spec:
         - name: realm-import
           configMap:
             name: keycloak-realm-config
-            defaultMode: 0644
