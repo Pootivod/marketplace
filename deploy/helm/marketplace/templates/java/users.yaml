@@ -1,0 +1,16 @@
+{{ include "marketplace.service" (dict
+  "root" .
+  "name" "users"
+  "labels" (dict "exposed" "true")
+) }}
+---
+{{ include "marketplace.deployment" (dict
+  "root" .
+  "name" "users"
+  "replicas" 1
+  "image" (include "marketplace.image" (dict "root" . "name" "users" "tag" .Values.image.tag))
+  "envFrom" (list
+    (dict "secretRef" (dict "name" "marketplace-secrets"))
+    (dict "configMapRef" (dict "name" "global-config"))
+  )
+) }}

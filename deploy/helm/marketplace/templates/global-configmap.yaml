@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-config
+  namespace: {{ .Values.namespace.name }}
+data:
+  KEYCLOAK_ADDR: "http://keycloak:8080"
+  KEYCLOAK_ADMIN_REALM: {{ .Values.keycloak.adminRealm | quote }}
+  KEYCLOAK_REALM: {{ .Values.keycloak.realm | quote }}
+  KEYCLOAK_ADMIN_CLIENT_ID: {{ .Values.keycloak.adminClientId | quote }}
+  KEYCLOAK_USER_CLIENT_ID: {{ .Values.keycloak.userClientId | quote }}
+  POSTGRES_ADDR: "postgres:5432"

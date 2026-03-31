@@ -1,9 +1,29 @@
 app:
   keycloak:
-#    TODO: В k8s конфиге прописать
-    server-url: "http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_REALM}"
+    server-url: ${KEYCLOAK_ADDR}
     admin-realm: ${KEYCLOAK_ADMIN_REALM:master}
-    client-id: ${KEYCLOAK_CLIENT_ID:admin-cli}
+    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+    user-client-id: ${KEYCLOAK_USER_CLIENT_ID:marketplace-users}
+    user-client-secret: ${KEYCLOAK_USER_CLIENT_SECRET}
     username: ${KEYCLOAK_ADMIN}
     password: ${KEYCLOAK_ADMIN_PASSWORD}
     app-realm: ${KEYCLOAK_REALM:marketplace}
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://${POSTGRES_ADDR}/users
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+logging:
+  level:
+    # Самый важный лог: покажет матчеры и цепочки
+    org.springframework.security: DEBUG
+    # Покажет детальный путь запроса и заголовки
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
+    # Покажет, как отрабатывают предикаты роутов (для сверки пути)
+    org.springframework.cloud.gateway: TRACE

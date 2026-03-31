@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-config
+  namespace: {{ $.Values.namespace.name }}
+data:
+  marketplace-realm.json: |
+    {
+      "realm": "{{ $.Values.keycloak.realm }}",
+      "enabled": true,
+      "verifyEmail": false,
+      "requiredActions": [
+        {
+          "alias": "CONFIGURE_TOTP",
+          "enabled": true,
+          "defaultAction": false,
+          "priority": 10,
+          "providerId": "CONFIGURE_TOTP"
+        },
+        {
+          "alias": "UPDATE_PASSWORD",
+          "enabled": true,
+          "defaultAction": false,
+          "priority": 20,
+          "providerId": "UPDATE_PASSWORD"
+        },
+        {
+          "alias": "UPDATE_PROFILE",
+          "enabled": true,
+          "defaultAction": false,
+          "priority": 30,
+          "providerId": "UPDATE_PROFILE"
+        },
+        {
+          "alias": "VERIFY_EMAIL",
+          "enabled": true,
+          "defaultAction": false,
+          "priority": 40,
+          "providerId": "VERIFY_EMAIL"
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "admin"
+          },
+          {
+            "name": "user"
+          },
+          {
+            "name": "worker-support"
+          },
+          {
+            "name": "worker-pudo"
+          },
+          {
+            "name": "worker-courier"
+          }
+        ]
+      },
+      "clients": [
+        {
+          "clientId": "{{ $.Values.keycloak.adminClientId }}",
+          "publicClient": false,
+          "directAccessGrantsEnabled": true,
+          "serviceAccountsEnabled": true
+        },
+        {
+          "clientId": "{{ $.Values.keycloak.userClientId }}",
+          "secret": "{{ $.Values.secrets.keycloakUserClientSecret }}",
+          "publicClient": false,
+          "directAccessGrantsEnabled": true,
+          "serviceAccountsEnabled": false,
+          "standardFlowEnabled": false
+        }
+      ]
+    }

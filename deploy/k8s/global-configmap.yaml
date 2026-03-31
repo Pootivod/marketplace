@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: global-config
 data:
-  KEYCLOAK_ADDR: "keycloak:8080"
+  KEYCLOAK_ADDR: "http://keycloak:8080"
   KEYCLOAK_REALM: "marketplace"
   POSTGRES_ADDR: "postgres:5432"

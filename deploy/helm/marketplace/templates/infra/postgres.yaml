@@ -1,0 +1,42 @@
+{{ include "marketplace.service" (dict
+  "root" .
+  "name" "postgres"
+  "type" "ClusterIP"
+  "port" 5432
+  "targetPort" 5432
+) }}
+---
+{{ include "marketplace.statefulset" (dict
+  "root" .
+  "name" "postgres"
+  "serviceName" "postgres"
+  "replicas" 1
+  "image" "postgres:18-alpine"
+  "ports" (list (dict "containerPort" 5432))
+  "env" (list
+    (dict
+      "name" "POSTGRES_USER"
+      "valueFrom" (dict "secretKeyRef" (dict "name" "marketplace-secrets" "key" "POSTGRES_USER"))
+    )
+    (dict
+      "name" "POSTGRES_PASSWORD"
+      "valueFrom" (dict "secretKeyRef" (dict "name" "marketplace-secrets" "key" "POSTGRES_PASSWORD"))
+    )
+  )
+  "volumeMounts" (list
+    (dict "name" "postgres-data" "mountPath" "/var/lib/postgresql/data")
+    (dict "name" "init-script" "mountPath" "/docker-entrypoint-initdb.d")
+  )
+  "volumes" (list
+    (dict "name" "init-script" "configMap" (dict "name" "postgres-init"))
+  )
+  "volumeClaimTemplates" (list
+    (dict
+      "metadata" (dict "name" "postgres-data")
+      "spec" (dict
+        "accessModes" (list "ReadWriteOnce")
+        "resources" (dict "requests" (dict "storage" "1Gi"))
+      )
+    )
+  )
+) }}
