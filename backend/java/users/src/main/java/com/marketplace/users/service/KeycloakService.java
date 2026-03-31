@@ -86,7 +86,8 @@ public class KeycloakService {
      * @return JWT
      */
     public Mono<String> login(String keycloakUsername, String encryptedPassword) {
-        return Mono.fromCallable(() -> getUserKeycloak(keycloakUsername, encryptedPassword).tokenManager().getAccessTokenString());
+        return Mono.fromCallable(() -> getUserKeycloak(keycloakUsername, encryptedPassword).tokenManager().getAccessTokenString())
+            .subscribeOn(Schedulers.boundedElastic());
     }
 
     private Keycloak getAdminKeycloak() {
