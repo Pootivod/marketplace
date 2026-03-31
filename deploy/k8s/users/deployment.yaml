@@ -10,7 +10,7 @@ spec:
   type: ClusterIP
   ports:
     - port: 80
-      targetPort: 8082
+      targetPort: 8080
   selector:
     app: users
 
@@ -35,7 +35,7 @@ spec:
           image: localhost:5000/users:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8082
+            - containerPort: 8080
           envFrom:
             - secretRef:
                 name: marketplace-secrets

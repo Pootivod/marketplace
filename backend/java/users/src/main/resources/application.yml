@@ -1,0 +1,9 @@
+app:
+  keycloak:
+#    TODO: В k8s конфиге прописать
+    server-url: "http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_REALM}"
+    admin-realm: ${KEYCLOAK_ADMIN_REALM:master}
+    client-id: ${KEYCLOAK_CLIENT_ID:admin-cli}
+    username: ${KEYCLOAK_ADMIN}
+    password: ${KEYCLOAK_ADMIN_PASSWORD}
+    app-realm: ${KEYCLOAK_REALM:marketplace}

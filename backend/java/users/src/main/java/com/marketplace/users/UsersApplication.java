@@ -1,11 +1,11 @@
-package com.marketplace.goods;
+package com.marketplace.users;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GoodsApplication {
+public class UsersApplication {
     public static void main(String[] args) {
-        SpringApplication.run(GoodsApplication.class, args);
+        SpringApplication.run(UsersApplication.class, args);
     }
 }
