@@ -1,5 +1,6 @@
 package com.marketplace.users.service;
 
+import com.marketplace.users.dto.AuthResponse;
 import com.marketplace.users.dto.RegisterRequest;
 import com.marketplace.users.dto.LoginRequest;
 import com.marketplace.users.entity.User;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -20,30 +20,31 @@ public class UserService {
     private final KeycloakService keycloakService;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
 
-    public Mono<User> register(RegisterRequest request) {
-        return findKeycloakUsernameByLogin(request.getLogin())
-            .flatMap(existingUser -> Mono.<User>error(new IllegalArgumentException("User already exists")))
+    public Mono<AuthResponse> register(RegisterRequest request) {
+        return findUserByLogin(request.getLogin())
+            .flatMap(existingUser -> Mono.<AuthResponse>error(new IllegalArgumentException("User already exists")))
             .switchIfEmpty(
-                Mono.fromCallable(() -> keycloakService.createUser(request.getEncryptedPassword()))
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .flatMap(keycloakUsername -> saveCreatedUser(keycloakUsername, request))
+                keycloakService.createUser(request.getEncryptedPassword())
+                    .flatMap(keycloakUsername -> saveCreatedToRepository(keycloakUsername, request)
+                        .then(keycloakService.login(keycloakUsername, request.getEncryptedPassword()))
+                        .map(jwt -> buildAuthResponse(jwt, request.getFirstName(), request.getLastName())))
             );
     }
 
-    public Mono<String> login(LoginRequest request) {
+    public Mono<AuthResponse> login(LoginRequest request) {
         String login = request.getLogin();
 
         if (login == null || login.isBlank()) {
             return Mono.error(new IllegalArgumentException("Empty login"));
         }
 
-        return findKeycloakUsernameByLogin(login)
-            .flatMap(keycloakUsername -> Mono.fromCallable(
-                () -> keycloakService.login(keycloakUsername, request.getEncryptedPassword())
-            ).subscribeOn(Schedulers.boundedElastic()));
+        return findUserByLogin(login)
+            .switchIfEmpty(Mono.error(new IllegalArgumentException("User not found")))
+            .flatMap(user -> keycloakService.login(user.getId(), request.getEncryptedPassword())
+                .map(jwt -> buildAuthResponse(jwt, user.getFirstName(), user.getLastName())));
     }
 
-    private Mono<User> saveCreatedUser(String keycloakUsername, RegisterRequest request) {
+    private Mono<User> saveCreatedToRepository(String keycloakUsername, RegisterRequest request) {
         User user = new User();
         user.setId(keycloakUsername);
 
@@ -60,8 +61,16 @@ public class UserService {
         return r2dbcEntityTemplate.insert(User.class).using(user);
     }
 
-    private Mono<String> findKeycloakUsernameByLogin(String login) {
-//        TODO: Улучшить
-        return login.contains("@") ? userRepository.findIdByEmail(login) : userRepository.findIdByPhone(login);
+    private Mono<User> findUserByLogin(String login) {
+        return login.contains("@") ? userRepository.findByEmail(login) : userRepository.findByPhone(login);
+    }
+
+    // TODO: Заменить на mapstruct
+    private AuthResponse buildAuthResponse(String jwt, String firstName, String lastName) {
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setJwt(jwt);
+        authResponse.setFirstName(firstName);
+        authResponse.setLastName(lastName);
+        return authResponse;
     }
 }
