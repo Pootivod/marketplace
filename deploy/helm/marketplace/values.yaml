@@ -12,6 +12,12 @@ keycloak:
   adminClientId: admin-cli
   userClientId: marketplace-users
 
+security:
+  roles:
+    goods:
+      - name: GOODS_MANAGE_ROLE
+        value: admin
+
 secrets:
   postgresUser: user
   postgresPassword: password

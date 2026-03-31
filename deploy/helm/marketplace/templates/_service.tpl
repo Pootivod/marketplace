@@ -12,8 +12,12 @@ metadata:
 spec:
   type: {{ default "ClusterIP" .type }}
   ports:
-    - port: {{ default 80 .port }}
+    - name: {{ default "http" .portName }}
+      port: {{ default 80 .port }}
       targetPort: {{ default 8080 .targetPort }}
+    - name: management
+      port: 9000
+      targetPort: 9000
   selector:
     app: {{ .name }}
 {{- end -}}

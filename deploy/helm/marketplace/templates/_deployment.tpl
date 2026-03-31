@@ -29,7 +29,7 @@ spec:
           {{- end }}
           ports:
             {{- toYaml (default (list (dict "containerPort" 8080)) .ports) | nindent 12 }}
-          {{- with .env }}
+          {{- with (or .env (index .root.Values.security.roles .name)) }}
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -54,3 +54,4 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 {{- end -}}
+
