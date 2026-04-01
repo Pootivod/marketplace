@@ -1,0 +1,17 @@
+{{- $postgres := .Values.services.postgres -}}
+{{- if and $postgres $postgres.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: {{ .Values.global.namespace.name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $postgres.persistence.size | default "1Gi" }}
+{{- with $postgres.persistence.storageClassName }}
+  storageClassName: {{ . | quote }}
+{{- end }}
+{{- end }}

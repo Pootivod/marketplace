@@ -35,13 +35,25 @@ spec:
       affinity:
 {{ toYaml . | nindent 8 }}
 {{- end }}
+{{- with .service.initContainers }}
+      initContainers:
+{{ toYaml . | nindent 8 }}
+{{- end }}
       containers:
         - name: {{ .name }}
           image: {{ include "marketplace.image" (dict "root" .root "name" .name "service" .service) }}
-          imagePullPolicy: {{ .root.Values.global.image.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ include "marketplace.imagePullPolicy" (dict "root" .root "name" .name "service" .service) }}
           ports:
-            - name: http
+            - name: {{ .service.portName | default "http" }}
               containerPort: {{ .service.containerPort | default 8080 }}
+{{- with .service.command }}
+          command:
+{{ toYaml . | nindent 12 }}
+{{- end }}
+{{- with .service.args }}
+          args:
+{{ toYaml . | nindent 12 }}
+{{- end }}
 {{- if .service.env }}
           env:
 {{ toYaml .service.env | nindent 12 }}
@@ -61,8 +73,16 @@ spec:
 {{ toYaml . | nindent 12 }}
 {{- end }}
 {{- end }}
+{{- with .service.volumeMounts }}
+          volumeMounts:
+{{ toYaml . | nindent 12 }}
+{{- end }}
 {{- with .service.resources }}
           resources:
+{{ toYaml . | nindent 12 }}
+{{- end }}
+{{- with .service.startupProbe }}
+          startupProbe:
 {{ toYaml . | nindent 12 }}
 {{- end }}
 {{- with .service.readinessProbe }}
@@ -72,5 +92,9 @@ spec:
 {{- with .service.livenessProbe }}
           livenessProbe:
 {{ toYaml . | nindent 12 }}
+{{- end }}
+{{- with .service.volumes }}
+      volumes:
+{{ toYaml . | nindent 8 }}
 {{- end }}
 {{- end -}}

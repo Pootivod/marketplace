@@ -27,6 +27,167 @@ global:
     KEYCLOAK_USER_CLIENT_SECRET: "users-client-secret"
 
 services:
+  postgres:
+    enabled: true
+    image:
+      repository: postgres
+      tag: "16-alpine"
+      pullPolicy: IfNotPresent
+    build:
+      type: external
+    replicas: 1
+    portName: tcp
+    containerPort: 5432
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 5432
+      targetPort: 5432
+    env:
+      - name: POSTGRES_DB
+        value: postgres
+      - name: POSTGRES_USER
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: POSTGRES_USER
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: POSTGRES_PASSWORD
+    volumeMounts:
+      - name: postgres-data
+        mountPath: /var/lib/postgresql/data
+      - name: postgres-init
+        mountPath: /docker-entrypoint-initdb.d
+    volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-data
+      - name: postgres-init
+        configMap:
+          name: postgres-init
+    persistence:
+      size: 1Gi
+    readinessProbe:
+      exec:
+        command:
+          - sh
+          - -c
+          - pg_isready -U "$POSTGRES_USER" -d postgres
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    livenessProbe:
+      exec:
+        command:
+          - sh
+          - -c
+          - pg_isready -U "$POSTGRES_USER" -d postgres
+      initialDelaySeconds: 20
+      periodSeconds: 10
+
+  keycloak:
+    enabled: true
+    image:
+      repository: quay.io/keycloak/keycloak
+      tag: "25.0.6"
+      pullPolicy: IfNotPresent
+    build:
+      type: external
+    replicas: 1
+    containerPort: 8080
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 8080
+      targetPort: 8080
+    command:
+      - /opt/keycloak/bin/kc.sh
+    args:
+      - start-dev
+      - --import-realm
+    env:
+      - name: KC_DB
+        value: postgres
+      - name: KC_DB_URL
+        value: jdbc:postgresql://postgres:5432/keycloak
+      - name: KC_DB_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: POSTGRES_USER
+      - name: KC_DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: POSTGRES_PASSWORD
+      - name: KC_HTTP_ENABLED
+        value: "true"
+      - name: KC_HEALTH_ENABLED
+        value: "true"
+      - name: KC_METRICS_ENABLED
+        value: "true"
+      - name: KC_BOOTSTRAP_ADMIN_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: KEYCLOAK_ADMIN
+      - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: KEYCLOAK_ADMIN_PASSWORD
+      - name: KEYCLOAK_ADMIN
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: KEYCLOAK_ADMIN
+      - name: KEYCLOAK_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: global-secret
+            key: KEYCLOAK_ADMIN_PASSWORD
+    initContainers:
+      - name: wait-for-postgres
+        image: postgres:16-alpine
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER"; do echo waiting for postgres; sleep 2; done
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: global-secret
+                key: POSTGRES_USER
+    volumeMounts:
+      - name: keycloak-realm
+        mountPath: /opt/keycloak/data/import
+    volumes:
+      - name: keycloak-realm
+        configMap:
+          name: keycloak-realm-import
+    startupProbe:
+      httpGet:
+        path: /realms/master
+        port: 8080
+      failureThreshold: 30
+      periodSeconds: 5
+    readinessProbe:
+      httpGet:
+        path: /realms/master
+        port: 8080
+      initialDelaySeconds: 20
+      periodSeconds: 10
+    livenessProbe:
+      httpGet:
+        path: /realms/master
+        port: 8080
+      initialDelaySeconds: 60
+      periodSeconds: 20
+
   web:
     enabled: true
     imageName: web
@@ -102,7 +263,7 @@ services:
     affinity: {}
 
   gateway:
-    enabled: false
+    enabled: true
     imageName: gateway
     build:
       type: java

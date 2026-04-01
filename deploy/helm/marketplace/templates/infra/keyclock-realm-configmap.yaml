@@ -1,0 +1,75 @@
+{{- $keycloak := .Values.services.keycloak -}}
+{{- if and $keycloak $keycloak.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-import
+  namespace: {{ .Values.global.namespace.name }}
+data:
+  marketplace-realm.json: |
+    {
+      "realm": "{{ .Values.global.config.KEYCLOAK_REALM | default "marketplace" }}",
+      "enabled": true,
+      "registrationAllowed": true,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "resetPasswordAllowed": true,
+      "clients": [
+        {
+          "clientId": "marketplace-gateway",
+          "name": "Marketplace Gateway",
+          "enabled": true,
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "standardFlowEnabled": true,
+          "redirectUris": [
+            "http://localhost:3000/*",
+            "http://localhost:8080/*"
+          ],
+          "webOrigins": [
+            "http://localhost:3000",
+            "http://localhost:8080"
+          ],
+          "protocol": "openid-connect"
+        },
+        {
+          "clientId": "marketplace-web",
+          "name": "Marketplace Web",
+          "enabled": true,
+          "publicClient": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": false,
+          "redirectUris": [
+            "http://localhost:3000/*",
+            "http://localhost:8080/*"
+          ],
+          "webOrigins": [
+            "http://localhost:3000",
+            "http://localhost:8080"
+          ],
+          "protocol": "openid-connect"
+        },
+        {
+          "clientId": "{{ .Values.global.config.KEYCLOAK_USER_CLIENT_ID | default "marketplace-users" }}",
+          "name": "Marketplace Users Service",
+          "enabled": true,
+          "publicClient": false,
+          "secret": "{{ .Values.global.secretData.KEYCLOAK_USER_CLIENT_SECRET | default "users-client-secret" }}",
+          "directAccessGrantsEnabled": true,
+          "serviceAccountsEnabled": false,
+          "standardFlowEnabled": false,
+          "protocol": "openid-connect"
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "USER"
+          },
+          {
+            "name": "ADMIN"
+          }
+        ]
+      }
+    }
+{{- end }}

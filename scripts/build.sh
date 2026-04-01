@@ -15,6 +15,10 @@ build_one() {
   image_ref_v="$(image_ref "$service")"
 
   case "$build_type" in
+    external|"")
+      echo ">>> Skipping external image service '${service}' (${image_ref_v})"
+      return 0
+      ;;
     java)
       need_cmd mvn
       module="$(get_service_value "$service" "build.module" "$service")"
@@ -35,10 +39,11 @@ build_one() {
       minikube image load "${image_ref_v}"
       ;;
     *)
-      echo "Unsupported or missing build.type for service '${service}'" >&2
+      echo "Unsupported build.type '${build_type}' for service '${service}'" >&2
       exit 1
       ;;
   esac
+
   echo ">>> Loaded into minikube: ${image_ref_v}"
 }
 
@@ -46,7 +51,7 @@ if [[ -n "${SERVICE:-}" ]]; then
   build_one "${SERVICE}"
 else
   while IFS= read -r service; do
-    [[ -n "$service" ]] || continue
-    build_one "$service"
+    [[ -n "${service}" ]] || continue
+    build_one "${service}"
   done < <(enabled_services)
 fi

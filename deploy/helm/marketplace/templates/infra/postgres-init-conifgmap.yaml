@@ -1,0 +1,13 @@
+{{- $postgres := .Values.services.postgres -}}
+{{- if and $postgres $postgres.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: {{ .Values.global.namespace.name }}
+data:
+  01-create-databases.sql: |
+    CREATE DATABASE users;
+    CREATE DATABASE goods;
+    CREATE DATABASE keycloak;
+{{- end }}

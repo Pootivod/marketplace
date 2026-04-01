@@ -85,11 +85,15 @@ image_tag() {
 
 image_ref() {
   local service="$1"
-  local registry image_name tag
+  local registry repository image_name tag
   registry="$(get_merged_value "global.image.registry" "")"
-  image_name="$(get_service_value "$service" "imageName" "$service")"
-  tag="$(image_tag)"
-  if [[ -n "$registry" ]]; then
+  repository="$(get_service_value "$service" "image.repository" "")"
+  image_name="$(get_service_value "$service" "image.name" "$(get_service_value "$service" "imageName" "$service")")"
+  tag="$(get_service_value "$service" "image.tag" "$(image_tag)")"
+
+  if [[ -n "$repository" ]]; then
+    printf "%s:%s\n" "$repository" "$tag"
+  elif [[ -n "$registry" ]]; then
     printf "%s/%s:%s\n" "$registry" "$image_name" "$tag"
   else
     printf "%s:%s\n" "$image_name" "$tag"
