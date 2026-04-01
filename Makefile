@@ -1,58 +1,63 @@
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
+.DEFAULT_GOAL := help
 
-.PHONY: start stop \
-        up-web down-web \
-        up-gateway-api down-gateway-api \
-        up-users-api down-users-api \
-        up-keycloak down-keycloak \
-        up-postgres-users down-postgres-users \
-        up-postgres-keycloak down-postgres-keycloak \
-        up-pgadmin down-pgadmin
+ENV ?= dev
+SERVICE ?=
+TAG ?=
+LOCAL_PORT ?=
+TAIL ?= 200
+NAMESPACE ?=
+BUILD ?= 0
 
-start:
-	@./scripts/start.sh
+.PHONY: help services build up down logs port-forward template status pods svc
 
-stop:
-	@./scripts/stop.sh
+help: ## Show commands and flags
+	@echo ""
+	@echo "Marketplace deploy commands"
+	@echo ""
+	@echo "Usage:"
+	@echo "  make <target> [ENV=dev] [SERVICE=name] [TAG=latest] [LOCAL_PORT=8090] [TAIL=200] [BUILD=0]"
+	@echo ""
+	@echo "Targets:"
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / { printf "  %-14s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "Flags:"
+	@echo "  ENV        Values overlay name. Default: dev"
+	@echo "  SERVICE    Target service name. Omit to affect all enabled services"
+	@echo "  TAG        Image tag override. Default from values.yaml"
+	@echo "  LOCAL_PORT Local port for port-forward"
+	@echo "  TAIL       Number of lines for logs. Default: 200"
+	@echo "  BUILD      For 'up': if BUILD=1, build images before deploy"
+	@echo ""
 
-up-web:
-	@./scripts/up-service.sh web
+services: ## List services from values and their main settings
+	@ENV=$(ENV) ./scripts/services.sh
 
-down-web:
-	@./scripts/down-service.sh web
+build: ## Build one service or all enabled services and load images into minikube
+	@ENV=$(ENV) SERVICE=$(SERVICE) TAG=$(TAG) ./scripts/build.sh
 
-up-gateway-api:
-	@./scripts/up-service.sh gateway-api
+up: ## Deploy one service or all enabled services; same command also works as restart
+	@ENV=$(ENV) SERVICE=$(SERVICE) TAG=$(TAG) BUILD=$(BUILD) NAMESPACE=$(NAMESPACE) ./scripts/up.sh
 
-down-gateway-api:
-	@./scripts/down-service.sh gateway-api
+down: ## Disable one service or uninstall the whole release
+	@ENV=$(ENV) SERVICE=$(SERVICE) TAG=$(TAG) NAMESPACE=$(NAMESPACE) ./scripts/down.sh
 
-up-users-api:
-	@./scripts/up-service.sh users-api
+logs: ## Show logs for one service deployment
+	@test -n "$(SERVICE)" || (echo "SERVICE is required"; exit 1)
+	@ENV=$(ENV) SERVICE=$(SERVICE) TAIL=$(TAIL) NAMESPACE=$(NAMESPACE) ./scripts/logs.sh
 
-down-users-api:
-	@./scripts/down-service.sh users-api
+port-forward: ## Forward localhost:LOCAL_PORT to service port
+	@test -n "$(SERVICE)" || (echo "SERVICE is required"; exit 1)
+	@ENV=$(ENV) SERVICE=$(SERVICE) LOCAL_PORT=$(LOCAL_PORT) NAMESPACE=$(NAMESPACE) ./scripts/port-forward.sh
 
-up-keycloak:
-	@./scripts/up-service.sh keycloak
+template: ## Render Helm manifests locally
+	@ENV=$(ENV) TAG=$(TAG) NAMESPACE=$(NAMESPACE) ./scripts/template.sh
 
-down-keycloak:
-	@./scripts/down-service.sh keycloak
+status: ## Show Helm release status
+	@./scripts/status.sh $(ENV) $(NAMESPACE)
 
-up-postgres-users:
-	@./scripts/up-service.sh postgres-users
+pods: ## Show pods in namespace
+	@./scripts/pods.sh $(ENV) $(NAMESPACE)
 
-down-postgres-users:
-	@./scripts/down-service.sh postgres-users
-
-up-postgres-keycloak:
-	@./scripts/up-service.sh postgres-keycloak
-
-down-postgres-keycloak:
-	@./scripts/down-service.sh postgres-keycloak
-
-up-pgadmin:
-	@./scripts/up-service.sh pgadmin
-
-down-pgadmin:
-	@./scripts/down-service.sh pgadmin
+svc: ## Show services in namespace
+	@./scripts/svc.sh $(ENV) $(NAMESPACE)

@@ -1,0 +1,6 @@
+{{- range $name, $svc := .Values.services }}
+{{- if and $svc.enabled ($svc.service.enabled | default true) }}
+---
+{{ include "marketplace.service.tpl" (dict "root" $ "name" $name "service" $svc) }}
+{{- end }}
+{{- end }}

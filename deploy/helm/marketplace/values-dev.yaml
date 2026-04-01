@@ -1,0 +1,7 @@
+global:
+  image:
+    pullPolicy: IfNotPresent
+
+services:
+  gateway:
+    enabled: false

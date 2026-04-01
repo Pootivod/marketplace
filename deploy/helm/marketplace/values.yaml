@@ -1,20 +1,143 @@
-namespace:
-  name: marketplace
+global:
+  releaseName: marketplace
+  namespace:
+    name: marketplace
 
-image:
-  registry: localhost:5000
-  tag: latest
-  pullPolicy: Always
+  image:
+    registry: ""
+    tag: latest
+    pullPolicy: IfNotPresent
 
-keycloak:
-  realm: marketplace
-  adminRealm: master
-  adminClientId: admin-cli
-  userClientId: marketplace-users
+  createGlobalConfig: true
+  createGlobalSecret: true
 
-secrets:
-  postgresUser: user
-  postgresPassword: password
-  keycloakAdmin: user
-  keycloakAdminPassword: password
-  keycloakUserClientSecret: users-client-secret
+  config:
+    KEYCLOAK_ADDR: "http://keycloak:8080"
+    KEYCLOAK_ADMIN_REALM: "master"
+    KEYCLOAK_REALM: "marketplace"
+    KEYCLOAK_ADMIN_CLIENT_ID: "admin-cli"
+    KEYCLOAK_USER_CLIENT_ID: "marketplace-users"
+    POSTGRES_ADDR: "postgres:5432"
+
+  secretData:
+    POSTGRES_USER: "user"
+    POSTGRES_PASSWORD: "password"
+    KEYCLOAK_ADMIN: "admin"
+    KEYCLOAK_ADMIN_PASSWORD: "admin"
+    KEYCLOAK_USER_CLIENT_SECRET: "users-client-secret"
+
+services:
+  web:
+    enabled: true
+    imageName: web
+    build:
+      type: docker
+      context: frontend/web
+    replicas: 1
+    containerPort: 80
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 80
+      targetPort: 80
+    labels: {}
+    podLabels: {}
+    env: []
+    extraEnvFrom: []
+    envFromGlobalConfig: false
+    envFromGlobalSecret: false
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  users:
+    enabled: true
+    imageName: users
+    build:
+      type: java
+      module: users
+    replicas: 1
+    containerPort: 8080
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 8080
+      targetPort: 8080
+    labels:
+      exposed: "true"
+    podLabels: {}
+    env: []
+    extraEnvFrom: []
+    envFromGlobalConfig: true
+    envFromGlobalSecret: true
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  goods:
+    enabled: true
+    imageName: goods
+    build:
+      type: java
+      module: goods
+    replicas: 1
+    containerPort: 8080
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 8080
+      targetPort: 8080
+    labels:
+      exposed: "true"
+    podLabels: {}
+    env: []
+    extraEnvFrom: []
+    envFromGlobalConfig: true
+    envFromGlobalSecret: true
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  gateway:
+    enabled: false
+    imageName: gateway
+    build:
+      type: java
+      module: gateway
+    replicas: 1
+    containerPort: 8080
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 8080
+      targetPort: 8080
+    labels: {}
+    podLabels: {}
+    env: []
+    extraEnvFrom: []
+    envFromGlobalConfig: true
+    envFromGlobalSecret: false
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    serviceAccount:
+      create: true
+      name: gateway
+    rbac:
+      create: true
+    readinessProbe:
+      httpGet:
+        path: /actuator/health/readiness
+        port: 8080
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    livenessProbe:
+      httpGet:
+        path: /actuator/health/liveness
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 15
